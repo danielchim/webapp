@@ -42,14 +42,14 @@ export default function IndexPage() {
     <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
       <div className="flex max-w-[980px] flex-col items-start gap-2">
         <h1 className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
-          Events
+          Applied
         </h1>
       </div>
       <Tabs defaultValue="account">
         <TabsList>
-          <TabsTrigger value="account">Public</TabsTrigger>
-          <TabsTrigger value="password">Student</TabsTrigger>
-          <TabsTrigger value="department">Department</TabsTrigger>
+          <TabsTrigger value="account">All</TabsTrigger>
+          <TabsTrigger value="password">Upcoming</TabsTrigger>
+          <TabsTrigger value="department">Archived</TabsTrigger>
         </TabsList>
         <TabsContent value="account" className="flex flex-col gap-4">
           <EventCard />

@@ -1,8 +1,8 @@
 'use client';
 
-import { Bookmark, Check } from "lucide-react"
-import { cn } from "@/lib/utils"
+import { Bookmark, MoreVertical, MapPin, Clock, Share, MessageCircle, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Card,
   CardContent,
@@ -11,90 +11,238 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter
+} from "@/components/ui/dialog"
 
-const notifications = [
-  {
-    title: "Your call has been confirmed.",
-    description: "1 hour ago",
-  },
-  {
-    title: "You have a new message!",
-    description: "1 hour ago",
-  },
-  {
-    title: "Your subscription is expiring soon!",
-    description: "2 hours ago",
-  },
-]
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast"
+import { Toaster } from "@/components/ui/toaster"
+import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { BlockRenderer } from "@/components/ui/block-renderer";
+import { CommentUser } from "@/components/ui/comment";
+import { Separator } from "@/components/ui/separator"
+import { useState } from "react";
+import Image from "next/image"
+import { AspectRatio } from "@/components/ui/aspect-ratio"
+
 
 type CardProps = React.ComponentProps<typeof Card>
 
+const blocks = {
+  "time": 1550476186479,
+  "blocks": [
+    {
+      "type": "header",
+      "data": {
+        "text": "Editor.js",
+        "level": 2
+      }
+    },
+    {
+      "type": "paragraph",
+      "data": {
+        "text": "Hey. Meet the new Editor. On this page you can see it in action — try to edit this text. Source code of the page contains the example of connection and configuration."
+      }
+    },
+    {
+      "type": "header",
+      "data": {
+        "text": "Key features",
+        "level": 3
+      }
+    },
+    {
+      "type": "paragraph",
+      "data": {
+        "text": `「順龍仁澤 學義同行」服務學習實踐計劃 (VolTrekkers) 由2016年開展至今，帶領恒大同學運用課堂知識，組織服務以貢獻社會，從反思活動的過程中得到啟發，促進個人成長。
+
+
+        本學年，計劃將帶領恒大同學一同探索本地三大主題：長者、殘疾人士及基層兒童。完成本地服務後的同學，更有機會衝出香港，到東南亞國家（馬來西亞、越南等）進行海外服務，挑戰自己！`
+      }
+    },
+    {
+      "type": "paragraph",
+      "data": {
+        "text": `「順龍仁澤 學義同行」服務學習實踐計劃 (VolTrekkers) 由2016年開展至今，帶領恒大同學運用課堂知識，組織服務以貢獻社會，從反思活動的過程中得到啟發，促進個人成長。
+
+
+        本學年，計劃將帶領恒大同學一同探索本地三大主題：長者、殘疾人士及基層兒童。完成本地服務後的同學，更有機會衝出香港，到東南亞國家（馬來西亞、越南等）進行海外服務，挑戰自己！`
+      }
+    },
+    {
+      "type": "paragraph",
+      "data": {
+        "text": `「順龍仁澤 學義同行」服務學習實踐計劃 (VolTrekkers) 由2016年開展至今，帶領恒大同學運用課堂知識，組織服務以貢獻社會，從反思活動的過程中得到啟發，促進個人成長。
+
+
+        本學年，計劃將帶領恒大同學一同探索本地三大主題：長者、殘疾人士及基層兒童。完成本地服務後的同學，更有機會衝出香港，到東南亞國家（馬來西亞、越南等）進行海外服務，挑戰自己！`
+      }
+    },
+  ],
+  "version": "2.8.1"
+}
+
 export function EventCard({ className, ...props }: CardProps) {
+  const [showComment, setShowComment] = useState(false)
+  const [saved, setIsSaved] = useState(false)
+  const [expand, setExpand] = useState(false)
+  const { toast } = useToast()
+
   return (
     <Card {...props}>
       <CardHeader>
         <CardTitle>Notifications</CardTitle>
         <CardDescription className="flex flex-row items-center gap-2">
-          <Avatar className="w-5 h-5">
+          <Avatar className="h-5 w-5">
             <AvatarImage src="https://github.com/shadcn.png" />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
           SSC
         </CardDescription>
+        <div className="flex flex-row items-center gap-4">
+          <div className="flex flex-row items-center gap-2">
+            <MapPin />Demo
+
+          </div>
+          <div className="flex flex-row items-center gap-2">
+            <Clock />
+            <div className="flex flex-col">
+              <p>2023/07/20</p>
+              <p>12:30 AM</p>
+            </div>
+            <p>-</p>
+            <div className="flex flex-col">
+              <p>2023/07/20</p>
+              <p>12:30 AM</p>
+            </div>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent className="grid gap-4">
-        <p>各位同學,
+      <CardContent className={`flex gap-4 ${!expand ? "flex-row cursor-pointer hover:text-slate-500" : "flex-col"}`} onClick={() => !expand ? setExpand(!expand) : null}>
+        <Image src="/image8.png" width='250' height='125' alt="Image" className="rounded-md object-cover" />
+        <div>
+          <BlockRenderer blocks={blocks} isClamped={expand} />
+          {expand ? (
+            <Button onClick={() => expand ? setExpand(!expand) : null} variant={"ghost"}>
+              Collapse
+            </Button>
+          ) : (<> </>)}
 
+        </div>
 
-
-          由香港特區政府財庫局主辦的「灣區專上學生金融科技雙向實習計劃」，旨在讓香港及大灣區內地城市修讀金融科技課程的專上學生在金融科技企業跨境實習，及早培養其投身金融科技事業的興趣，藉以壯大本地的金融科技人才庫。
-
-
-
-          計劃當中的冬季實習計劃由即日起至2023年11月30日接受申請，實習期為最少兩個月。
-
-
-
-          申請者必須是：
-
-          i)              年滿18歲，在香港或大灣區內地城市有開設金融科技相關學科的專上院校修讀的全日制學生，當中包括高級文憑及副學士學生、本科生、碩士生或研究生。計劃接受主修、副修或專修金融科技相關學科，或曾修讀兩個或以上與金融科技相關科目的申請者參加。 數碼港會尋求參與院校核實申請者的資格，或按個別情況考慮申請者的學科是否符合資格。
-
-          ii)             持有效身份證明文件及/或簽證；及
-
-          iii)           沒有同時領取香港特區內地城市政府在其他公共資助計劃的實習津貼；及
-
-          iv)           並非為所申請實習職位之參與企業的東主、董事、合夥人或股東，或其親屬；及
-
-          v)            於計劃申請期前3個月內未曾獲聘於所申請實習職位之參與企業或其關聯公司。
-
-
-
-          香港及大灣區內地城市的實習職位申請資格如下：
-
-          -          香港的實習職位 — 接受在香港就讀的內地學生，以及在大灣區內地城市就讀而持有效來港簽注的內地學生申請；
-
-          -          大灣區內地城市的實習職位 — 接受在香港及大灣區內地城市就讀的香港學生申請。
-
-
-
-          實習津貼：
-
-          -          香港的實習職位：港幣12,000 （每月)
-
-          -          大灣區內地城市的實習職位：人民幣10,500 （每月)</p>
       </CardContent>
-      <CardFooter className="gap-2 ">
-
-        <Button>
-          Apply
-        </Button>
-        <Button variant={"secondary"}>
-          <Bookmark className="h-4 w-4" />
-        </Button>
-        <Check className=" h-4 w-4" />
-
+      <CardFooter className="flex justify-between">
+        <div className="flex gap-2 ">
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button>
+                Apply
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Apply for the event</DialogTitle>
+                <DialogDescription>
+                  Make changes to your profile here. Click apply when you're done.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="name" className="text-right">
+                    Name
+                  </Label>
+                  <Input
+                    id="name"
+                    defaultValue="Pedro Duarte"
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="email" className="text-right">
+                    Email
+                  </Label>
+                  <Input
+                    id="email"
+                    defaultValue="s216743@hsu.edu.hk"
+                    className="col-span-3"
+                  />
+                </div>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="stuid" className="text-right">
+                    Student ID
+                  </Label>
+                  <Input
+                    id="stuid"
+                    defaultValue="S216743"
+                    className="col-span-3"
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="submit" onClick={() => {
+                  toast({
+                    title: "Event applied!",
+                  })
+                }}>Apply</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Button variant={"secondary"} onClick={() => {
+            setIsSaved(!saved)
+            toast({
+              title: !saved ? "Event Saved!" : "Event Unsaved!",
+            })
+          }}>
+            {saved ? (
+              <Check className="h-4 w-4" />
+            ) : (
+              <Bookmark className="h-4 w-4" />
+            )}
+          </Button>
+          <Toaster />
+        </div>
+        <div className="xs:gap-2 flex">
+          <Button variant={"link"} className="flex gap-4" onClick={() => setShowComment(!showComment)}>
+            <MessageCircle className=" h-4 w-4" />23
+          </Button>
+          <Button variant={"link"}>
+            <Share className=" h-4 w-4" />
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <MoreVertical className="h-4 w-4" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem>Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </CardFooter>
+      {
+        showComment ? (
+          <CardContent className="grid gap-4">
+            <Separator />
+            <Textarea placeholder="Type your message here." />
+            <Button>Send</Button>
+            <CommentUser />
+          </CardContent>
+        ) : (<></>)
+      }
+
     </Card>
   )
 }

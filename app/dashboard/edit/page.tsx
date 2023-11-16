@@ -5,6 +5,8 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import { BlockRenderer } from "@/components/ui/block-renderer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Button } from "@/components/ui/button"
+import Link from "next/link";
 
 
 const blocks = {
@@ -40,29 +42,13 @@ export default function IndexPage() {
   const [data, setData] = useState(blocks);
   return (
     <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
-      <div className="flex max-w-[980px] flex-col items-start gap-2">
+      <div className="flex flex-row justify-between gap-2">
         <h1 className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
-          Events
+          Create new event
         </h1>
       </div>
-      <Tabs defaultValue="account">
-        <TabsList>
-          <TabsTrigger value="account">Public</TabsTrigger>
-          <TabsTrigger value="password">Student</TabsTrigger>
-          <TabsTrigger value="department">Department</TabsTrigger>
-        </TabsList>
-        <TabsContent value="account" className="flex flex-col gap-4">
-          <EventCard />
-          <EventCard />
-          <EventCard />
-        </TabsContent>
-        <TabsContent value="password">
-          <BlockRenderer blocks={data} />
-        </TabsContent>
-        <TabsContent value="department">
-          <Editor data={data} onChange={setData} holder="editorjs-container" />
-        </TabsContent>
-      </Tabs>
+      <EventCard />
+      <Editor data={data} onChange={setData} holder="editorjs-container" />
     </section>
   )
 }

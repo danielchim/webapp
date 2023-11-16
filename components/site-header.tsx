@@ -1,11 +1,14 @@
+'use client'
 import Link from "next/link"
 
 import { siteConfig } from "@/config/site"
-import {Button, buttonVariants} from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
 import { MainNav } from "@/components/main-nav"
 import { ThemeToggle } from "@/components/theme-toggle"
 import * as React from "react";
+import { AuthDialog } from "./auth-dialog"
+
 
 export function SiteHeader() {
   return (
@@ -48,7 +51,7 @@ export function SiteHeader() {
             </div>
           </Link>
           <ThemeToggle />
-          <Button>Sign In</Button>
+          <AuthDialog />
         </nav>
       </div>
     </header>

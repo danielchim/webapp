@@ -1,15 +1,19 @@
-import React, { memo, useEffect, useRef } from "react";
-import EditorJS from "@editorjs/editorjs";
+import React, { useEffect, useRef } from "react";
+import EditorJS, { OutputData } from "@editorjs/editorjs";
+import { EDITOR_TOOLS } from "@/config/editor-tools";
 
-export const Editor = ({ data, onChange, editorblock }) => {
+export default function Editor({ data, onChange, holder }) {
+  //add a reference to editor
   const ref = useRef();
-  //Initialize editorjs
+
+  //initialize editorjs
   useEffect(() => {
-    //Initialize editorjs if we don't have a reference
+    //initialize editor if we don't have a reference
     if (!ref.current) {
       const editor = new EditorJS({
-        holder: editorblock,
-        data: data,
+        holder: holder,
+        tools: EDITOR_TOOLS,
+        data,
         async onChange(api, event) {
           const data = await api.saver.save();
           onChange(data);
@@ -18,14 +22,14 @@ export const Editor = ({ data, onChange, editorblock }) => {
       ref.current = editor;
     }
 
-    //Add a return function to handle cleanup
+    //add a return function handle cleanup
     return () => {
       if (ref.current && ref.current.destroy) {
         ref.current.destroy();
       }
     };
   }, []);
-  return <div id={editorblock} />;
-};
 
-export default memo(Editor);
+
+  return <div id={holder} className="prose max-w-full" />;
+};
