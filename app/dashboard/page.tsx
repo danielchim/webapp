@@ -7,6 +7,7 @@ import { BlockRenderer } from "@/components/ui/block-renderer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import Link from "next/link";
+import {DashboardCard} from "@/components/dashboard-card";
 
 
 const blocks = {
@@ -22,7 +23,7 @@ const blocks = {
     {
       "type": "paragraph",
       "data": {
-        "text": "Hey. Meet the new Editor. On this page you can see it in action — try to edit this text. Source code of the page contains the example of connection and configuration."
+        "text": "Hey. Meet the new Editor. On this page you can see it in action — try to create this text. Source code of the page contains the example of connection and configuration."
       }
     },
     {
@@ -46,7 +47,7 @@ export default function IndexPage() {
         <h1 className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
           Dashboard
         </h1>
-        <Link href="/dashboard/edit?action=create">
+        <Link href="/dashboard/create">
           <Button>Create</Button>
         </Link>
       </div>
@@ -57,12 +58,10 @@ export default function IndexPage() {
           <TabsTrigger value="department">Department</TabsTrigger>
         </TabsList>
         <TabsContent value="account" className="flex flex-col gap-4">
-          <EventCard />
-          <EventCard />
-          <EventCard />
+          <DashboardCard />
         </TabsContent>
         <TabsContent value="password">
-          <BlockRenderer blocks={data} />
+          <BlockRenderer blocks={data}/>
         </TabsContent>
         <TabsContent value="department">
           <Editor data={data} onChange={setData} holder="editorjs-container" />

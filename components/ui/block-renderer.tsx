@@ -2,7 +2,7 @@ import React from 'react';
 
 // Individual components for each block type
 const HeadingBlock = ({ text }) => (
-  <h2 className="text-2xl font-bold mt-4 mb-2">{text}</h2>
+  <h2 className="mb-2 mt-4 text-2xl font-bold">{text}</h2>
 );
 
 const ParagraphBlock = ({ text }) => <p className="mb-4">{text}</p>;
@@ -14,7 +14,7 @@ const blockComponentMap = {
   // Add more block types as needed
 };
 
-export const BlockRenderer = ({ isClamped, blocks }) => {
+export const BlockRenderer = ({ isClamped=true, blocks }) => {
   return (
     <div className={!isClamped?"line-clamp-2":"line-clamp-none"}>
       {blocks.blocks.map((block, index) => {
