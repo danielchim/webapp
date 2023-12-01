@@ -1,3 +1,5 @@
+'use client'
+
 import {
   Dialog,
   DialogContent,
@@ -10,7 +12,33 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
+import { supabaseBrowserClient } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
+import { useState } from "react";
+
 export const AuthDialog = () => {
+  const router = useRouter()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('123456')
+  const handleSignUp = async () => {
+    const res = await supabaseBrowserClient.auth.signUp({
+      email,
+      password,
+      options: {
+        emailRedirectTo: `${location.origin}/register`,
+      },
+    })
+    router.refresh()
+  }
+
+  const handleSignIn = async () => {
+    await supabaseBrowserClient.auth.signInWithPassword({
+      email,
+      password,
+    })
+    router.refresh()
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -26,9 +54,10 @@ export const AuthDialog = () => {
               Email
             </Label>
             <Input
-              id="name"
+              id="email"
               defaultValue="s216743@hsu.edu.hk"
               className="col-span-3"
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
@@ -36,7 +65,7 @@ export const AuthDialog = () => {
               Student ID
             </Label>
             <Input
-              id="email"
+              id="studentId"
               defaultValue="s216743"
               className="col-span-3"
             />
@@ -50,12 +79,14 @@ export const AuthDialog = () => {
               type="password"
               defaultValue="S216743"
               className="col-span-3"
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
         </div>
         <DialogFooter>
           <div className="flex w-full flex-col gap-2">
-            <Button type="submit" className="w-full">Sign in</Button>
+            <Button className="w-full" onClick={handleSignIn}>Sign in</Button>
+            <Button className="w-full" onClick={handleSignUp}>Sign up</Button>
             <Separator />
             <Button type="submit" className="w-full" variant={"ghost"}>
               Sign in with Google

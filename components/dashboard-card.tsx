@@ -39,74 +39,41 @@ import {useState} from "react";
 import Image from "next/image"
 import {AspectRatio} from "@/components/ui/aspect-ratio"
 import Link from "next/link";
+import { supabaseBrowserClient } from "@/lib/supabase";
 
-
-type CardProps = React.ComponentProps<typeof Card>
-
-const blocks = {
-  "time": 1550476186479,
-  "blocks": [
-    {
-      "type": "header",
-      "data": {
-        "text": "Editor.js",
-        "level": 2
-      }
-    },
-    {
-      "type": "paragraph",
-      "data": {
-        "text": "Hey. Meet the new Editor. On this page you can see it in action — try to create this text. Source code of the page contains the example of connection and configuration."
-      }
-    },
-    {
-      "type": "header",
-      "data": {
-        "text": "Key features",
-        "level": 3
-      }
-    },
-    {
-      "type": "paragraph",
-      "data": {
-        "text": `「順龍仁澤 學義同行」服務學習實踐計劃 (VolTrekkers) 由2016年開展至今，帶領恒大同學運用課堂知識，組織服務以貢獻社會，從反思活動的過程中得到啟發，促進個人成長。
-
-
-        本學年，計劃將帶領恒大同學一同探索本地三大主題：長者、殘疾人士及基層兒童。完成本地服務後的同學，更有機會衝出香港，到東南亞國家（馬來西亞、越南等）進行海外服務，挑戰自己！`
-      }
-    },
-    {
-      "type": "paragraph",
-      "data": {
-        "text": `「順龍仁澤 學義同行」服務學習實踐計劃 (VolTrekkers) 由2016年開展至今，帶領恒大同學運用課堂知識，組織服務以貢獻社會，從反思活動的過程中得到啟發，促進個人成長。
-
-
-        本學年，計劃將帶領恒大同學一同探索本地三大主題：長者、殘疾人士及基層兒童。完成本地服務後的同學，更有機會衝出香港，到東南亞國家（馬來西亞、越南等）進行海外服務，挑戰自己！`
-      }
-    },
-    {
-      "type": "paragraph",
-      "data": {
-        "text": `「順龍仁澤 學義同行」服務學習實踐計劃 (VolTrekkers) 由2016年開展至今，帶領恒大同學運用課堂知識，組織服務以貢獻社會，從反思活動的過程中得到啟發，促進個人成長。
-
-
-        本學年，計劃將帶領恒大同學一同探索本地三大主題：長者、殘疾人士及基層兒童。完成本地服務後的同學，更有機會衝出香港，到東南亞國家（馬來西亞、越南等）進行海外服務，挑戰自己！`
-      }
-    },
-  ],
-  "version": "2.8.1"
+// extend component props add more props
+interface CardProps extends React.ComponentProps<typeof Card>{
+  id:string,
+  eventName: string,
+  eventOwner: string,
+  eventLocation?: string,
+  eventStartTime?: string,
+  eventEndTime?: string,
+  eventDescription?: string,
+  appliedCount: number,
+  commentCount: number,
 }
+export const revalidate = 0
 
-export function DashboardCard({className, ...props}: CardProps) {
+export function DashboardCard({id,className,eventName,eventDescription,appliedCount,commentCount,...props}: CardProps) {
   const [showComment, setShowComment] = useState(false)
   const [saved, setIsSaved] = useState(false)
   const [expand, setExpand] = useState(false)
   const {toast} = useToast()
+  async function handleDelete(event: MouseEvent) {
+    event.preventDefault()
+    const res = await supabaseBrowserClient.from('event').delete().eq('id',id).select()
+    if (res.error) {
+      console.error(res.error)
+    } else {
+      console.log(res)
+    }
+  }
 
   return (
     <Card {...props}>
       <CardHeader>
-        <CardTitle>Notifications</CardTitle>
+        <CardTitle>{eventName}</CardTitle>
         <CardDescription className="flex flex-row items-center gap-2">
           <Avatar className="h-5 w-5">
             <AvatarImage src="https://github.com/shadcn.png"/>
@@ -132,22 +99,21 @@ export function DashboardCard({className, ...props}: CardProps) {
           </div>
         </div>
       </CardHeader>
-      <Link href={"dashboard/event/a"}>
-        <CardContent className={`flex gap-4 flex-row hover:text-slate-500 cursor-pointer`}
-                     onClick={() => !expand ? setExpand(!expand) : null}>
+      <Link href={`dashboard/event/${id}`}>
+        <CardContent className={`flex cursor-pointer flex-row gap-4 hover:text-slate-500`}>
           <Image src="/image8.png" width='250' height='125' alt="Image" className="rounded-md object-cover"/>
           <div>
-            <BlockRenderer blocks={blocks} isClamped={false}/>
+            <BlockRenderer blocks={eventDescription} isClamped={false}/>
           </div>
         </CardContent>
       </Link>
       <CardFooter className="flex justify-between">
         <div className="flex gap-2 ">
           <Button>
-            21 Applied
+            {appliedCount} Applied
           </Button>
           <Button variant={"secondary"} className="flex gap-2">
-            <Bookmark className=" h-4 w-4"/> 21
+            <Bookmark className=" h-4 w-4"/> {commentCount}
           </Button>
         </div>
         <div className="xs:gap-2 flex">
@@ -162,7 +128,7 @@ export function DashboardCard({className, ...props}: CardProps) {
               <MoreVertical className="h-4 w-4"/>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem>Delete</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

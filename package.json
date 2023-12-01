@@ -14,6 +14,8 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,mdx}\" --cache"
   },
   "dependencies": {
+    "@blocknote/core": "^0.9.6",
+    "@blocknote/react": "^0.9.6",
     "@editorjs/checklist": "^1.6.0",
     "@editorjs/delimiter": "^1.4.0",
     "@editorjs/editorjs": "^2.28.2",
@@ -41,16 +43,19 @@
     "@supabase/supabase-js": "^2.38.4",
     "class-variance-authority": "^0.4.0",
     "clsx": "^1.2.1",
+    "jotai": "^2.5.1",
     "lucide-react": "0.105.0-alpha.4",
     "next": "^14.0.2",
     "next-themes": "^0.2.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "sharp": "^0.31.3",
+    "swr": "^2.2.4",
     "tailwind-merge": "^1.13.2",
     "tailwindcss-animate": "^1.0.6"
   },
   "devDependencies": {
+    "@emotion/react": "^11.11.1",
     "@ianvs/prettier-plugin-sort-imports": "^3.7.2",
     "@types/node": "^17.0.45",
     "@types/react": "^18.2.14",
@@ -62,6 +67,7 @@
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-tailwindcss": "^3.13.0",
+    "jotai-devtools": "^0.7.0",
     "postcss": "^8.4.24",
     "prettier": "^2.8.8",
     "tailwindcss": "^3.3.2",

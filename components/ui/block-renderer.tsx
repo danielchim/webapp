@@ -17,7 +17,7 @@ const blockComponentMap = {
 export const BlockRenderer = ({ isClamped=true, blocks }) => {
   return (
     <div className={!isClamped?"line-clamp-2":"line-clamp-none"}>
-      {blocks.blocks.map((block, index) => {
+      {blocks?.blocks.map((block, index) => {
         const Component = blockComponentMap[block.type];
         if (Component) {
           return <Component key={index} {...block.data} />;

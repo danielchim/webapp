@@ -35,77 +35,123 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { BlockRenderer } from "@/components/ui/block-renderer";
 import { CommentUser } from "@/components/ui/comment";
 import { Separator } from "@/components/ui/separator"
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
+import { supabaseBrowserClient } from "@/lib/supabase";
+import useSWR from "swr";
+import { fetcher } from "@/lib/fetcher";
+import { Skeleton } from "./ui/skeleton";
 
 
-type CardProps = React.ComponentProps<typeof Card>
-
-const blocks = {
-  "time": 1550476186479,
-  "blocks": [
-    {
-      "type": "header",
-      "data": {
-        "text": "Editor.js",
-        "level": 2
-      }
-    },
-    {
-      "type": "paragraph",
-      "data": {
-        "text": "Hey. Meet the new Editor. On this page you can see it in action — try to create this text. Source code of the page contains the example of connection and configuration."
-      }
-    },
-    {
-      "type": "header",
-      "data": {
-        "text": "Key features",
-        "level": 3
-      }
-    },
-    {
-      "type": "paragraph",
-      "data": {
-        "text": `「順龍仁澤 學義同行」服務學習實踐計劃 (VolTrekkers) 由2016年開展至今，帶領恒大同學運用課堂知識，組織服務以貢獻社會，從反思活動的過程中得到啟發，促進個人成長。
-
-
-        本學年，計劃將帶領恒大同學一同探索本地三大主題：長者、殘疾人士及基層兒童。完成本地服務後的同學，更有機會衝出香港，到東南亞國家（馬來西亞、越南等）進行海外服務，挑戰自己！`
-      }
-    },
-    {
-      "type": "paragraph",
-      "data": {
-        "text": `「順龍仁澤 學義同行」服務學習實踐計劃 (VolTrekkers) 由2016年開展至今，帶領恒大同學運用課堂知識，組織服務以貢獻社會，從反思活動的過程中得到啟發，促進個人成長。
-
-
-        本學年，計劃將帶領恒大同學一同探索本地三大主題：長者、殘疾人士及基層兒童。完成本地服務後的同學，更有機會衝出香港，到東南亞國家（馬來西亞、越南等）進行海外服務，挑戰自己！`
-      }
-    },
-    {
-      "type": "paragraph",
-      "data": {
-        "text": `「順龍仁澤 學義同行」服務學習實踐計劃 (VolTrekkers) 由2016年開展至今，帶領恒大同學運用課堂知識，組織服務以貢獻社會，從反思活動的過程中得到啟發，促進個人成長。
-
-
-        本學年，計劃將帶領恒大同學一同探索本地三大主題：長者、殘疾人士及基層兒童。完成本地服務後的同學，更有機會衝出香港，到東南亞國家（馬來西亞、越南等）進行海外服務，挑戰自己！`
-      }
-    },
-  ],
-  "version": "2.8.1"
+interface CardProps extends React.ComponentProps<typeof Card> {
+  event: any
 }
 
-export function EventCard({ className, ...props }: CardProps) {
+const CommentSection = ({ eventId }: { eventId: string }) => {
+  const { data, error, isLoading } = useSWR(`/api/events/comments?eventId=${eventId}`, fetcher)
+  const [comment, setComment] = useState("")
+  const { toast } = useToast()
+  const handleComment = async () => {
+    // save to supabase
+    console.log(comment)
+    const userSession = await supabaseBrowserClient.auth.getSession()
+    const { data, error } = await supabaseBrowserClient.from('event_comments').insert({ 'user_id': userSession.data.session?.user.id, 'event_id': eventId, 'comment': comment }).select()
+    console.log(error)
+    if (data) {
+      toast({
+        title: "Comment Sent!",
+      })
+    } else if (error) {
+      toast({
+        title: "There was an error",
+        description: error.message
+      })
+    }
+  }
+  return (
+    <CardContent className="grid gap-4">
+      <Separator />
+      <Textarea placeholder="Type your message here." onChange={e => setComment(e.target.value)} />
+      <Button disabled={comment === "" ? true : false} onClick={handleComment}>Send</Button>
+      {isLoading ? (
+        <CardContent className="grid gap-4">
+          <Separator />
+          <div className="flex items-center space-x-4">
+            <Skeleton className="h-12 w-12 rounded-full" />
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-[250px]" />
+              <Skeleton className="h-4 w-[200px]" />
+            </div>
+          </div>
+        </CardContent>
+      ) : (
+        <>
+          {data?.data.map((comment) => (
+            <CommentUser key={comment.id} comment={comment.comment} />
+          ))}
+          {data?.data.length === 0 ? (
+            <>
+              <Separator />
+              <p className="mx-auto flex items-center justify-center">No one has made any comments..yet.</p>
+            </>
+          ) : null}
+        </>
+      )}
+    </CardContent>
+  )
+}
+
+export function EventCard({ className, event, ...props }: CardProps) {
   const [showComment, setShowComment] = useState(false)
   const [saved, setIsSaved] = useState(false)
   const [expand, setExpand] = useState(false)
+  const [open, setOpen] = useState(false);
+  const [imageUrl, setImageUrl] = useState("")
   const { toast } = useToast()
-
+  const [applyInfo, setApplyInfo] = useState({
+    name: "",
+    email: "",
+    stuid: ""
+  })
+  const handleApply = async () => {
+    // save to supabase
+    const userSession = await supabaseBrowserClient.auth.getSession()
+    const { data, error } = await supabaseBrowserClient.from('user_applied_event').insert({ 'user_id': userSession.data.session?.user.id, 'event_id': event.id, 'name': applyInfo.name }).select()
+    if (data) {
+      return true
+    } else if (error) {
+      return false
+    }
+  }
+  const handleSave = async () => {
+    // save to supabase
+    const userSession = await supabaseBrowserClient.auth.getSession()
+    if (await supabaseBrowserClient.from('user_saved_event').select().eq('user_id', userSession.data.session?.user.id!).eq('event_id', event.id).then(res => res?.data?.length !== undefined && res?.data?.length > 0)) {
+      const { data, error } = await supabaseBrowserClient.from('user_saved_event').delete().eq('user_id', userSession.data.session?.user.id!).eq('event_id', event.id).select()
+      if (data) {
+        return true
+      } else if (error) {
+        return false
+      }
+    } else {
+      const { data, error } = await supabaseBrowserClient.from('user_saved_event').insert({ 'user_id': userSession.data.session?.user.id, 'event_id': event.id }).select()
+      if (data) {
+        return true
+      } else if (error) {
+        return false
+      }
+    }
+  }
+  useEffect(() => {
+    const {data} = supabaseBrowserClient.storage.from('image').getPublicUrl(event.cover_image_url)
+    setImageUrl(data.publicUrl)
+  }, [])
+  console.log(imageUrl)
   return (
     <Card {...props}>
       <CardHeader>
-        <CardTitle>Notifications</CardTitle>
+        <CardTitle>{event.event_name}</CardTitle>
         <CardDescription className="flex flex-row items-center gap-2">
           <Avatar className="h-5 w-5">
             <AvatarImage src="https://github.com/shadcn.png" />
@@ -116,7 +162,6 @@ export function EventCard({ className, ...props }: CardProps) {
         <div className="flex flex-row items-center gap-4">
           <div className="flex flex-row items-center gap-2">
             <MapPin />Demo
-
           </div>
           <div className="flex flex-row items-center gap-2">
             <Clock />
@@ -132,10 +177,10 @@ export function EventCard({ className, ...props }: CardProps) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className={`flex gap-4 ${!expand ? "flex-row cursor-pointer hover:text-slate-500" : "flex-col"}`} onClick={() => !expand ? setExpand(!expand) : null}>
-        <Image src="/image8.png" width='250' height='125' alt="Image" className="rounded-md object-cover" />
+      <CardContent className={`flex gap-4 ${!expand ? "cursor-pointer flex-row hover:text-slate-500" : "flex-col"}`} onClick={() => !expand ? setExpand(!expand) : null}>
+        {event.cover_image_url !== null ? <Image src={imageUrl} width='250' height='125' alt="Image" className="rounded-md object-cover" /> : <> </>}
         <div>
-          <BlockRenderer blocks={blocks} isClamped={expand} />
+          <BlockRenderer blocks={event.event_data} isClamped={expand} />
           {expand ? (
             <Button onClick={() => expand ? setExpand(!expand) : null} variant={"ghost"}>
               Collapse
@@ -143,11 +188,10 @@ export function EventCard({ className, ...props }: CardProps) {
           ) : (<> </>)}
 
         </div>
-
       </CardContent>
       <CardFooter className="flex justify-between">
         <div className="flex gap-2 ">
-          <Dialog>
+          <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
               <Button>
                 Apply
@@ -169,6 +213,7 @@ export function EventCard({ className, ...props }: CardProps) {
                     id="name"
                     defaultValue="Pedro Duarte"
                     className="col-span-3"
+                    onChange={(e) => setApplyInfo({ ...applyInfo, name: e.target.value })}
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -193,19 +238,43 @@ export function EventCard({ className, ...props }: CardProps) {
                 </div>
               </div>
               <DialogFooter>
-                <Button type="submit" onClick={() => {
-                  toast({
-                    title: "Event applied!",
+                <Button type="submit" onClick={(e) => {
+                  e.preventDefault()
+                  handleApply().then((res) => {
+                    console.log(res)
+                    if (res) {
+                      toast({
+                        title: "Event Applied",
+                      })
+                    } else {
+                      toast({
+                        title: "Error!",
+                        description: "Please try again later."
+                      })
+                    }
+                    setOpen(!open)
                   })
                 }}>Apply</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
-          <Button variant={"secondary"} onClick={() => {
-            setIsSaved(!saved)
-            toast({
-              title: !saved ? "Event Saved!" : "Event Unsaved!",
+          <Button variant={"secondary"} onClick={(e) => {
+            e.preventDefault()
+            handleSave().then((res) => {
+              console.log(res)
+              if (res) {
+                toast({
+                  title: saved ? "Event Unsaved" : "Event Saved",
+                })
+                setIsSaved(!saved)
+              } else {
+                toast({
+                  title: "Error!",
+                  description: "Please try again later."
+                })
+              }
             })
+            setIsSaved(!saved)
           }}>
             {saved ? (
               <Check className="h-4 w-4" />
@@ -234,15 +303,9 @@ export function EventCard({ className, ...props }: CardProps) {
       </CardFooter>
       {
         showComment ? (
-          <CardContent className="grid gap-4">
-            <Separator />
-            <Textarea placeholder="Type your message here." />
-            <Button>Send</Button>
-            <CommentUser />
-          </CardContent>
+          <CommentSection eventId={event.id} />
         ) : (<></>)
       }
-
-    </Card>
+    </Card >
   )
 }

@@ -2,9 +2,9 @@ import React, { useEffect, useRef } from "react";
 import EditorJS, { OutputData } from "@editorjs/editorjs";
 import { EDITOR_TOOLS } from "@/config/editor-tools";
 
-export default function Editor({ data, onChange, holder }) {
+export default function Editor({ data, onChange, holder }:{data?: OutputData, onChange: (data: OutputData) => void, holder: string}) {
   //add a reference to editor
-  const ref = useRef();
+  const ref = useRef<EditorJS>();
 
   //initialize editorjs
   useEffect(() => {
